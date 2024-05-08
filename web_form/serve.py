@@ -1,23 +1,41 @@
 from flask import Flask, render_template, request, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
 
-# Assuming app.py is in the ASSIGNMENT1 directory, and templates are in web_form/templates
-serve = Flask(__name__, template_folder='web_form/templates')
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres@db/example'
+db = SQLAlchemy(app)
 
-# Route to display the form
-@serve.route('/', methods=['GET'])
+class Name(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(100), unique=False, nullable=False)
+    last_name = db.Column(db.String(100), unique=False, nullable=False)
+
+@app.route('/')
 def index():
     return render_template('index.html')
 
-# Route to handle form submission
-@serve.route('/submit', methods=['POST'])
+@app.route('/submit', methods=['POST'])
 def submit():
-    # Process form data
     first_name = request.form['first_name']
     last_name = request.form['last_name']
-    total_records = 1  # Placeholder for actual count logic
-    
-    # Redirect to the success page with total_records variable
+
+    # Check if name pair already exists
+    if Name.query.filter_by(first_name=first_name, last_name=last_name).first():
+        return redirect(url_for('name_exists'))
+
+    new_name = Name(first_name=first_name, last_name=last_name)
+    db.session.add(new_name)
+    db.session.commit()
+    return redirect(url_for('success'))
+
+@app.route('/success')
+def success():
+    total_records = Name.query.count()
     return render_template('success.html', total_records=total_records)
 
+@app.route('/name_exists')
+def name_exists():
+    return render_template('name_exists.html')
+
 if __name__ == '__main__':
-    serve.run(debug=True)
+    app.run(debug=True)
