@@ -17,22 +17,31 @@ services:
     networks:
       - backend
 
-  backend:
+  weblist:
     build:
-      context: backend
-      target: builder
+      context: weblist/
     restart: always
-    ports:
-      - 8000:8000
-    depends_on: [db]
+    depends_on:
+      - db
+    networks:
+      - backend
 
   proxy:
     build: proxy
     restart: always
     ports:
       - 80:80
+      - 81:81
     depends_on: 
+      - webform
+      - weblist
+    networks:
+      - frontend
       - backend
 
 volumes:
   db-data:
+
+networks:
+  frontend: {}
+  backend: {}
