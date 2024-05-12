@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Container C - Records</title>
+</head>
+<body>
+  <h1>Container C - Records</h1>
+  <div id="records"></div>
+  <script>
+    // Function to delete record by ID
+    function deleteRecord(id) {
+      fetch(`/${id}`, { method: 'DELETE' })
+        .then(response => {
+          if (response.ok) {
+            location.reload(); // Refresh page after deletion
+          } else {
+            console.error('Error deleting record:', response.statusText);
+          }
+        })
+        .catch(error => console.error('Error deleting record:', error));
+    }
+    // Fetch records from Flask endpoint
+    fetch('/records')
+      .then(response => response.json())
+      .then(records => {
+        const recordsDiv = document.getElementById('records');
+        records.forEach(record => {
+          recordsDiv.innerHTML += `
+            <div>
+              <span>ID: ${record.id}, Name: ${record.first_name} ${record.last_name}</span>
+              <button onclick="deleteRecord(${record.id})"> Delete </button>
+            </div>
+          `;
+        });
+      })
+      .catch(error => console.error('Error fetching records:', error));
+  </script>
+</body>
+</html>
