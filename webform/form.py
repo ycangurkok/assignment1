@@ -28,5 +28,14 @@ def submit():
     db.session.commit()
     return redirect(url_for('success'))
 
+@app.route('/success')
+def success():
+    total_records = Name.query.count()
+    return render_template('success.html', total_records=total_records)
+
+@app.route('/name_exists')
+def name_exists():
+    return render_template('name_exists.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
